@@ -78,7 +78,7 @@ ESPI filings are published as unstructured HTML with no public API. Manual monit
 ### Install
 
 ```bash
-git clone https://github.com/xjrkkk/espi-monitor.git
+git clone https://github.com/xjrkkk/espi-monitor
 cd ESPI-monitor
 pip install -r requirements.txt
 cp env_example.txt .env
