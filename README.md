@@ -79,7 +79,7 @@ ESPI filings are published as unstructured HTML with no public API. Manual monit
 
 ```bash
 git clone https://github.com/xjrkkk/espi-monitor
-cd ESPI-monitor
+cd espi-monitor
 pip install -r requirements.txt
 cp env_example.txt .env
 # fill in .env with your keys
