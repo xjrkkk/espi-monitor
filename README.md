@@ -1,6 +1,6 @@
 # GPW ESPI Monitor
 
-**Automated system that monitors Warsaw Stock Exchange (GPW) regulatory filings 24/7, filters them for material corporate events, and delivers AI-summarised alerts via Telegram — running on a $20 Raspberry Pi Zero 2W.**
+**Automated system that monitors Warsaw Stock Exchange (GPW/NewConnect) regulatory filings 24/7, filters them for material corporate events, and delivers AI-summarised alerts via Telegram — running on a $20 Raspberry Pi Zero 2W.**
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -13,7 +13,7 @@
 Polish listed companies are legally required to publish material events through the ESPI/EBI regulatory filing system. There are dozens of filings per day — most are noise (board appointments, AGM schedules, statute amendments). A minority contain actionable information: contracts, transactions, financing rounds, strategic agreements.
 
 This system:
-1. Scans BiznesRadar for small/mid-cap GPW companies matching specific fundamental criteria (market cap 20–150M PLN, revenue growth > 20% YoY)
+1. Scans BiznesRadar for small/mid-cap GPW and NewConnect companies matching specific fundamental criteria (market cap 20–150M PLN, revenue growth > 20% YoY)
 2. Polls the PAP ESPI portal for new filings from tracked companies
 3. Filters filings by keyword rules — passes contract/transaction signals, drops procedural noise
 4. Sends the full text to Claude Haiku for a 4-sentence investment-relevant summary
@@ -88,11 +88,24 @@ cp env_example.txt .env
 ### Run
 
 ```bash
-# Step 1: populate the company database
+# Step 1: populate the company database via BiznesRadar scan
 python skaner.py
+# Choose mode 1 — fetches companies matching the fundamental filter and saves them to spolki.db
+# Companies are saved with zatwierdzona=0 (pending) by default
 
-# Step 2: manually approve companies (set zatwierdzona=1 in spolki.db)
-# or use mode 2 to add companies directly with approval
+# Step 2a: approve companies from the scan
+# Open spolki.db in any SQLite editor and set zatwierdzona=1 for companies you want to track,
+# or zatwierdzona=2 to reject
+
+# Step 2b: alternatively, add a company manually (skips the scan entirely)
+python skaner.py
+# Choose mode 2, then fill in the prompts:
+#   Ticker:      stock symbol, e.g. CRE
+#   Nazwa:       display name, e.g. CRE (CREOTECH)
+#   Rynek:       GPW or NC (NewConnect)
+#   Nazwa ESPI:  search name used on the PAP ESPI portal, e.g. Creotech
+#                (check espiebi.pap.pl to confirm the exact name the company uses)
+# Manually added companies are approved automatically (zatwierdzona=1)
 
 # Step 3: run the ESPI monitor
 python news.py
@@ -103,7 +116,7 @@ python news.py
 ```bash
 crontab -e
 # Add: run every hour
-0 * * * * cd /home/pi/ESPI-monitor && python news.py >> /tmp/espi.log 2>&1
+0 * * * * cd /home/pi/espi-monitor && python news.py >> /tmp/espi.log 2>&1
 ```
 
 ### Environment variables
