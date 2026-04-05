@@ -115,8 +115,8 @@ python news.py
 
 ```bash
 crontab -e
-# Add: run every hour
-0 * * * * cd /home/pi/espi-monitor && python news.py >> /tmp/espi.log 2>&1
+# Add: run every 2 hours between 8:00 and 22:00
+0 8-22/2 * * * cd /home/pi/espi-monitor && python3 news.py >> /home/pi/espi-monitor/logs.txt 2>&1
 ```
 
 ### Environment variables
@@ -153,6 +153,10 @@ A filing must match at least one pass keyword and no reject keywords to proceed 
 
 **Haiku over Sonnet for summarisation** — Summarising a 2000-character ESPI filing into 4 sentences does not require reasoning capability. Haiku's latency (~1s) and cost (~10x cheaper than Sonnet) make it the right tool here.
 
+**Working directory in cron** — cron does not inherit the shell's working directory.
+Running `python3 /full/path/to/news.py` without a preceding `cd` causes SQLite to create
+a new empty database in whatever directory cron defaults to, silently ignoring the real one.
+Always prefix cron jobs with `cd /path/to/project &&` to ensure relative paths resolve correctly.
 ---
 
 ## Roadmap
